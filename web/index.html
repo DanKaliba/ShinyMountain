@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piráti Liberec – volby 2026</title>
+<meta name="description" content="Analýza výsledků společné kandidátky Liberec otevřený lidem a Piráti v komunálních volbách 2026 v Liberci po volebních okrscích: srovnání s rokem 2022 a sněmovními volbami 2025, mandáty, přesuny voličů a preferenční hlasy.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="style.css?v=20261020a">
+</head>
+<body>
+<header class="top" id="top">
+  <div class="wrap">
+    <p class="eyebrow">Komunální volby 9.–10. 10. 2026 · statutární město Liberec</p>
+    <h1>Jak dopadli Piráti v Liberci</h1>
+    <p class="lede">Společná kandidátka „Liberec otevřený lidem a&nbsp;Piráti“ po všech 87 volebních okrscích: srovnání se samostatnými kandidátkami z&nbsp;roku 2022 a&nbsp;se sněmovními volbami 2025, mandáty, odhad přesunů voličů a&nbsp;preferenční hlasy.</p>
+    <nav class="toc" aria-label="Obsah">
+      <a href="#zjisteni">Zjištění</a><a href="#strany">Strany</a><a href="#mandaty">Mandáty</a><a href="#okrsky">Okrsky</a><a href="#zmena">Kde se ztrácelo</a><a href="#presuny">Přesuny voličů</a><a href="#kandidati">Kandidáti</a><a href="#metodika">Metodika</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="tiles" class="tiles" aria-label="Hlavní čísla"></section>
+
+  <section id="zjisteni">
+    <h2>Hlavní zjištění</h2>
+    <div class="findings" data-md="hlavni-zjisteni.md"></div>
+  </section>
+
+  <section id="strany">
+    <h2>Zastupitelstvo města: strany 2022 → 2026</h2>
+    <p class="note" id="strany-note"></p>
+    <div class="grid2">
+      <figure class="card">
+        <figcaption>Bloky stran – podíl hlasů a mandáty z 39</figcaption>
+        <div id="ch-bloky"></div>
+        <p class="small">Bloky spojují kandidátky, které se mezi volbami spojily nebo rozdělily: „LOL a Piráti“ = 2022 Česká pirátská strana + Liberec otevřený lidem; „SLK, TOP 09, KDU“ = 2022 společná kandidátka, 2026 Starostové pro Liberecký kraj + LIBERECKÁ 9; „SPD a Trikolora“ = 2022 obě kandidátky, 2026 jen SPD.</p>
+      </figure>
+      <figure class="card">
+        <figcaption>Piráti a LOL ve volbách 2022–2026 (podíl hlasů v Liberci)</figcaption>
+        <div id="ch-trend"></div>
+      </figure>
+    </div>
+    <div class="grid2">
+      <figure class="card"><figcaption>Kandidátky 2026</figcaption><div class="tablewrap"><table class="data" id="tb-l26"></table></div></figure>
+      <figure class="card"><figcaption>Kandidátky 2022</figcaption><div class="tablewrap"><table class="data" id="tb-l22"></table></div></figure>
+    </div>
+  </section>
+
+  <section id="mandaty">
+    <h2>Mandáty: kolik chybělo a kolik zbývalo</h2>
+    <div class="prose" id="mand-text"></div>
+    <figure class="card">
+      <figcaption>Mandátové hrany (ostatní kandidátky beze změny)</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-hrany"></table></div>
+      <p class="small">Volič má v Liberci 39 hlasů, „voliči“ jsou proto hlasy ÷ 39 – orientačně, protože část lidí hlasy dělí mezi kandidátky.</p>
+    </figure>
+  </section>
+
+  <section id="okrsky">
+    <h2>Volební okrsky</h2>
+    <p class="note">Klikni na okrsek pro detail. Okrsky 1001–1007 jsou Vratislavice nad Nisou.</p>
+    <div class="controls" role="radiogroup" aria-label="Vrstva mapy" id="layer-btns"></div>
+    <div class="mapgrid">
+      <div>
+        <div id="map" class="map" role="img" aria-label="Mapa okrsků Liberce"></div>
+        <div class="legend" id="lg"></div>
+      </div>
+      <aside class="card detail" id="okr-detail" aria-live="polite"><p class="muted">Vyber okrsek v mapě nebo v tabulce.</p></aside>
+    </div>
+    <figure class="card">
+      <figcaption>Všech 87 okrsků</figcaption>
+      <div class="tablewrap tall"><table class="data sortable" id="tb-okr"></table></div>
+    </figure>
+  </section>
+
+  <section id="zmena">
+    <h2>Kde se ztrácelo</h2>
+    <div class="prose" id="zmena-text"></div>
+    <div class="grid2">
+      <figure class="card">
+        <figcaption>Síla LOL + Pirátů v okrsku 2022 × změna do 2026</figcaption>
+        <div id="ch-zmena"></div>
+      </figure>
+      <figure class="card">
+        <figcaption>Co souvisí se změnou podílu v okrsku (korelace, 87 okrsků)</figcaption>
+        <div class="tablewrap"><table class="data" id="tb-kor"></table></div>
+        <p class="small">p = permutační test (9 999 permutací); „FDR“ = významné i po korekci na 8 testů (Benjamini–Hochberg). Korelace není příčina.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section id="presuny">
+    <h2>Odhad přesunů voličů</h2>
+    <div class="prose" id="presuny-text"></div>
+    <div class="controls" role="radiogroup" aria-label="Srovnání" id="ei-btns"></div>
+    <figure class="card">
+      <figcaption id="ei-cap"></figcaption>
+      <div id="ch-sankey" class="sankey"></div>
+      <label class="small"><input type="checkbox" id="ei-nev"> zobrazit i ty, kdo nevolili ani jednou</label>
+    </figure>
+    <figure class="card">
+      <figcaption>Kam šli voliči jednotlivých kandidátek (% voličů, v závorce 90% interval)</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-ei"></table></div>
+      <p class="small" id="ei-note"></p>
+    </figure>
+  </section>
+
+  <section id="kandidati">
+    <h2>Kandidáti společné kandidátky</h2>
+    <div class="prose" id="kand-text"></div>
+    <figure class="card">
+      <figcaption>Liberec otevřený lidem a Piráti – 39 kandidátů (oficiální výsledky ČSÚ)</figcaption>
+      <div class="tablewrap tall"><table class="data sortable" id="tb-kand"></table></div>
+      <p class="small">Individuální hlasy = hlasy nad nejnižším počtem hlasů kandidáta v okrsku (ten přibližně odpovídá křížku pro celou kandidátku), sečtené přes okrsky.</p>
+    </figure>
+  </section>
+
+  <section id="metodika" class="prose">
+    <h2>Metodika a zdroje</h2>
+    <div data-md="metodika.md"></div>
+  </section>
+</main>
+
+<footer class="wrap small" style="padding:24px 16px 40px;color:var(--ink-2)">
+  Analýza vznikla s pomocí AI (Claude) z otevřených dat ČSÚ. Může obsahovat chyby – závazné jsou pouze výsledky vyhlášené volebními orgány.
+  Zdrojový kód, data a zjištění: <a href="https://github.com/DanKaliba/ShinyMountain">github.com/DanKaliba/ShinyMountain</a>.
+</footer>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="charts.js?v=20261020a"></script>
+<script src="app.js?v=20261020a"></script>
+</body>
+</html>

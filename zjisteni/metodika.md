@@ -1,0 +1,12 @@
+- **Data:** otevřená data ČSÚ ([volby.gov.cz](https://volby.gov.cz/opendata/opendata.htm)) – komunální volby 2026 (stav 11. 10. 2026) a 2022 (řádné volby 23.–24. 9. 2022), sněmovní volby 2025, hranice volebních okrsků (kv2022, okrsky se do roku 2026 nezměnily).
+- **Území:** zastupitelstvo statutárního města Liberec (39 mandátů), 87 okrsků – 1–80 Liberec, 1001–1007 Vratislavice nad Nisou. Čísla okrsků i počty voličů jsou ve všech třech volbách srovnatelné.
+- **Bloky:** kandidátky, které se mezi volbami spojily nebo rozdělily, jsou sloučené do bloků (LOL a Piráti; SLK, TOP 09, KDU; SPD a Trikolora). Podíly z okrsků se od oficiálních (`PROCHLSTR`) mohou lišit o setiny, protože oficiální procenta počítají s přepočtem neúplných kandidátek.
+- **Voliči:** volič má 39 hlasů, „voliči kandidátky“ jsou proto hlasy ÷ 39. Je to orientační přepočet – část lidí hlasy dělí mezi kandidátky.
+- **Mandáty:** přepočet 5% klauzulí a D'Hondtovou metodou reprodukuje oficiální výsledek 2022 i 2026. Hrany (kolik hlasů chybělo na další mandát, o kolik mohla kandidátka přijít) počítají se změnou jen jedné kandidátky.
+- **Swing:** plošný model (každý okrsek ztratí stejně procentních bodů) a poměrný (každý okrsek ztratí stejný díl podílu), srovnání vážené chyby (RMSE).
+- **Korelace:** Pearsonovo r, permutační p (9 999 permutací), korekce na vícenásobné testování Benjamini–Hochberg (FDR 5 %).
+- **Moranovo I:** 6 nejbližších sousedů podle těžiště okrsku, 999 permutací.
+- **Přesuny voličů:** Goodmanova ekologická regrese s omezeními (podíly na zapsaných voličích, řádky matice nezáporné se součtem 1), váhy = počet voličů, 90% intervaly z bootstrapu okrsků (200×). Vyřazené jsou okrsky se změnou počtu voličů mimo 80–125 %, s méně než 150 voliči nebo s velmi nízkou účastí (zbývá 85 z 87). Jde o odhad z rozdílů mezi okrsky (ekologický klam) – nikoli o zjištění, kdo jak volil.
+- **Individuální hlasy:** u každého okrsku se od hlasů kandidáta odečte nejnižší počet hlasů kandidáta na kandidátce (přibližně křížek pro celou kandidátku); zbytek jsou hlasy pro jednotlivce, sečtené přes okrsky.
+- **Přednostní hlasy:** kandidát s alespoň o 10 % víc hlasy, než je průměr na kandidáta kandidátky, postupuje dopředu.
+- Analýza vznikla s pomocí AI (Claude). Skripty: `scripts/liberec.py`.
