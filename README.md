@@ -29,8 +29,21 @@ Zdrojová data ČSÚ (rozbalené zipy z [volby.gov.cz](https://volby.gov.cz/open
 `KV2026_data_20261011_csv`, `KV2026reg20261011_csv`, `KV2022_data_20260328_csv`, `KV2022reg20260328_csv`,
 `PS2025data20251005_csv`, `PS2025reg20251005_csv` a `geo/kv2022_geo_vol_okrsky_2022g100.geojson`.
 
+Pro doplňky navíc `dl/rpss/rpss.json` (registr sociálních služeb MPSV), `dl/davky/*.xml` (dávky výsledků KV 2026 s časem zpracování okrsků)
+a složka `dl_liberec/`:
+
+| Soubor | Zdroj |
+|---|---|
+| `ruian/20260930_OB_563889_ADR.csv` | adresní místa RÚIAN – https://vdp.cuzk.cz/vymenny_format/csv/20260930_OB_563889_ADR.csv.zip |
+| `skoly/ms.html`, `skoly/zs.html` | https://zapisyms.liberec.cz/materske-skoly, https://zapisyzs.liberec.cz/zakladni-skoly |
+| `skoly/vyhlaska.txt` | text OZV č. 1/2025 o školských obvodech (Sbírka právních předpisů, `…/detail/SPPNYNWNNUUQF4Z2/text` je .docx) |
+| `census/*.geojson` | Statistický atlas ČSÚ, 1km grid SLDB 2021 (vrstvy 15948, 25948, 245948, 175948) pro obálku Liberce |
+| `telefony_vo.txt` | text PDF „Telefonní čísla do volebních místností“ z liberec.cz |
+
 ```bash
-python scripts/liberec.py dl data       # ~3 min (bootstrap ekologické inference)
+python scripts/liberec.py dl data                 # ~3 min (bootstrap ekologické inference)
+python scripts/doplnky.py dl dl_liberec data      # části města, školy, senioři, demografie, kontrola dat, kuriozity, statutární města (~3 min)
 ```
 
-Zdroje: ČSÚ – [volby.gov.cz](https://volby.gov.cz/opendata/opendata.htm), podkladové mapy © Esri.
+Zdroje: ČSÚ – [volby.gov.cz](https://volby.gov.cz/opendata/opendata.htm), ČÚZK – RÚIAN, MPSV – registr poskytovatelů sociálních služeb,
+statutární město Liberec (portály zápisů, OZV č. 1/2025, seznam volebních místností), Statistický atlas ČSÚ, podkladové mapy © Esri.

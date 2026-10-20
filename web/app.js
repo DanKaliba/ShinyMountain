@@ -12,12 +12,12 @@ document.querySelectorAll('main section[id]').forEach((sec) => {
 
 /* ---------- zjištění z Markdownu (složka zjisteni/) ---------- */
 document.querySelectorAll('[data-md]').forEach((elm) => {
-  fetch('../zjisteni/' + elm.dataset.md + '?v=20261020a').then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status)))).then((md) => {
+  fetch('../zjisteni/' + elm.dataset.md + '?v=20261020b').then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status)))).then((md) => {
     elm.innerHTML = window.marked ? marked.parse(md) : `<pre>${esc(md)}</pre>`;
   }).catch((e) => { elm.innerHTML = `<p class="muted">Soubor zjisteni/${esc(elm.dataset.md)} se nepodařilo načíst (${esc(e.message)}).</p>`; });
 });
 
-fetch('../data/liberec.json?v=20261020a').then((r) => r.json()).then(init).catch((e) => {
+fetch('../data/liberec.json?v=20261020b').then((r) => r.json()).then(init).catch((e) => {
   document.querySelector('main').insertAdjacentHTML('afterbegin', `<p class="card">Data se nepodařilo načíst (${esc(e.message)}). Stránku je potřeba otevřít přes web server, ne jako soubor.</p>`);
 });
 
@@ -90,9 +90,17 @@ function init(D) {
     { k: 'slk_2026', label: 'SLK, TOP 09, KDU 2026', br: [25, 29, 33, 37, 41], ramp: ORANGE },
     { k: 'ano_2026', label: 'ANO 2026', br: [12, 15, 18, 21, 24], ramp: ORANGE },
     { k: 'ucast_2026', label: 'Účast 2026', br: [32, 37, 42, 47, 52], ramp: BLUE },
+    { k: 'zs_uspesnost', label: 'Spádová ZŠ: úspěšnost zápisu', br: [80, 85, 90, 95, 99], ramp: BLUE },
+    { k: 'zs_mista_na_spadove', label: 'Spádová ZŠ: místa na spádové dítě', br: [0.7, 0.8, 0.9, 1.1, 1.3], ramp: BLUE, fmt: (v) => nf(v, 1), num: true },
+    { k: 'cen_65', label: 'Senioři 65+ (SLDB)', br: [15, 18, 21, 24, 27], ramp: BLUE },
+    { k: 'cen_0_14', label: 'Děti 0–14 (SLDB)', br: [14, 15, 16, 17.5, 19], ramp: BLUE },
+    { k: 'cen_byty_neobydl', label: 'Neobydlené byty (SLDB)', br: [5, 7, 9, 12, 14], ramp: BLUE },
+    { k: 'cen_rust_11_21', label: 'Růst obyvatel 2011–21', br: [-5, 0, 5, 10, 20], ramp: BLUE },
+    { k: 'rust_volicu', label: 'Přírůstek voličů 2022 → 2026', br: [-5, -2, 0, 2, 5], ramp: BLUE },
+    { k: 'hodin_secteni', label: 'Čas sečtení', br: [3.5, 4, 4.5, 5.5, 6.5], ramp: ORANGE, fmt: (v) => nf(v, 1) + ' h', num: true, unit: ' hodin po uzavření místností (sobota 14:00)' },
   ];
   let cur = LAYERS[0], sel = null, lyr;
-  const fmtV = (L, v) => (L.pp ? pp(v) : pct(v));
+  const fmtV = (L, v) => (L.pp ? pp(v) : L.num ? L.fmt(v) : pct(v));
   const map = L.map('map', { scrollWheelZoom: false, zoomSnap: 0.25 });
   tiles(map);
   const btns = $('#layer-btns');
@@ -111,7 +119,7 @@ function init(D) {
     if (cur.pp) $('#lg').insertAdjacentHTML('beforeend', '<span class="muted">p. b.</span>');
     if (cur.unit) $('#lg').insertAdjacentHTML('beforeend', `<span class="muted">${esc(cur.unit)}</span>`);
   }
-  const oname = (o) => `Okrsek ${o.okrsek}${o.vratislavice ? ' · Vratislavice' : ''}`;
+  const oname = (o) => `Okrsek ${o.okrsek} · ${o.ctvrt || ''}`;
   fetch('../data/okrsky_liberec.geojson').then((r) => r.json()).then((g) => {
     lyr = L.geoJSON(g, {
       style: styleF,
@@ -128,7 +136,7 @@ function init(D) {
     sel = n; const o = byO[n];
     lyr && lyr.setStyle(styleF);
     if (pan && lyr) lyr.eachLayer((l) => l.feature.properties.o === n && map.fitBounds(l.getBounds(), { maxZoom: 15 }));
-    $('#okr-detail').innerHTML = `<h3>${oname(o)}</h3><p class="sub">${int(o.volici)} voličů v seznamu</p>
+    $('#okr-detail').innerHTML = `<h3>${oname(o)}</h3><p class="sub">${int(o.volici)} voličů v seznamu · ${o.ctvrt_podil} % adres v části ${esc(o.ctvrt)}${o.ctvrt_dalsi.length ? ', dále ' + o.ctvrt_dalsi.map(esc).join(', ') : ''}<br>volební místnost: ${esc(o.mistnost || '–')}${o.domov_seniory ? ` · domov pro seniory (${int(o.domov_seniory)} lůžek)` : ''}</p>
       <dl>
         <dt>Piráti + LOL 2022 → LOL a Piráti 2026</dt><dd>${pct(o.blok_2022)} → <b>${pct(o.blok_2026)}</b></dd>
         <dt>Změna</dt><dd class="${sgnCls(o.zmena)}">${pp(o.zmena)}</dd>
@@ -139,10 +147,15 @@ function init(D) {
         <dt>Pirátští kandidáti v individuálních hlasech</dt><dd>${pct(o.pir_individualni)}</dd>
         <dt>Lepší Liberec / SLK+ / ANO 2026</dt><dd>${pct(o.ll_2026)} / ${pct(o.slk_2026)} / ${pct(o.ano_2026)}</dd>
         <dt>Účast 2022 → 2026 (sněmovní 2025)</dt><dd>${pct(o.ucast_2022)} → ${pct(o.ucast_2026)} (${pct(o.ucast_ps)})</dd>
+        <dt>Spádová ZŠ (${o.zs_obvod_podil} % adres)</dt><dd>${esc(o.zs_spadova || '–')}${o.zs_uspesnost != null ? ` · úspěšnost zápisu ${pct(o.zs_uspesnost, 0)}` : ''}</dd>
+        <dt>Senioři 65+ / děti 0–14 (SLDB 2021)</dt><dd>${pct(o.cen_65)} / ${pct(o.cen_0_14)}</dd>
+        <dt>Voliči 2022 → 2026</dt><dd>${int(o.volici_2022)} → ${int(o.volici)} (${pr(o.rust_volicu)})</dd>
+        <dt>Sečteno</dt><dd>${o.cas_secteni ? o.cas_secteni.slice(11, 16) : '–'}</dd>
       </dl>`;
   }
   table($('#tb-okr'), [
-    { k: 'okrsek', label: 'Okrsek', n: 1, f: (r) => r.okrsek + (r.vratislavice ? ' V' : '') },
+    { k: 'okrsek', label: 'Okrsek', n: 1 },
+    { k: 'ctvrt', label: 'Část města' },
     { k: 'volici', label: 'Voliči', n: 1, f: (r) => int(r.volici) },
     { k: 'blok_2022', label: '2022', n: 1, f: (r) => pct(r.blok_2022), title: 'Piráti + LOL 2022' },
     { k: 'blok_2026', label: '2026', n: 1, f: (r) => pct(r.blok_2026), title: 'LOL a Piráti 2026' },
@@ -220,4 +233,125 @@ function init(D) {
     { k: 'zvolen', label: 'Mandát', sv: (r) => (r.zvolen ? 100 - r.poradi_mandat : 0), f: (r) => (r.zvolen ? `ano (${r.poradi_mandat}.)` : '–'), title: 'v závorce pořadí, v jakém mandát připadl' },
     { k: 'list_2022', label: 'Kandidatura 2022', f: (r) => (r.list_2022 ? esc(r.list_2022) + (r.zvolen_2022 ? ' · mandát' : '') : '–') },
   ], D.kandidati_koalice, { rowClass: (r) => (r.nominace === 'Piráti' ? 'hl' : '') });
+
+  if (D.doplnky) doplnky(D, byO, oname);
+}
+
+/* ---------- doplňky: části města, statutární města, školy, senioři, demografie, kontrola dat, kuriozity ---------- */
+function doplnky(D, byO, oname) {
+  const X = D.doplnky;
+  const sig = (r) => (r.fdr ? `<b>${rf(r.r)}</b>` : rf(r.r));
+
+  /* části města */
+  const CT = X.ctvrti.filter((c) => c.okrsku >= 2).sort((a, b) => b.blok_2026 - a.blok_2026);
+  dumbbell($('#ch-ctvrti'), CT.map((c) => ({ label: `${c.ctvrt} (${c.okrsku})`, a: c.blok_2022, b: c.blok_2026, hi: true })), { la: '2022', lb: '2026', max: 25 });
+  $('#ch-ctvrti').insertAdjacentHTML('beforeend', '<p class="small">Jen části se dvěma a více okrsky (v závorce počet okrsků).</p>');
+  table($('#tb-ctvrti'), [
+    { k: 'ctvrt', label: 'Část' }, { k: 'okrsku', label: 'Okrsků', n: 1 }, { k: 'volici', label: 'Voliči', n: 1, f: (r) => int(r.volici) },
+    { k: 'blok_2026', label: '2026', n: 1, f: (r) => pct(r.blok_2026) },
+    { k: 'zmena', label: 'Změna', n: 1, f: (r) => `<span class="${sgnCls(r.zmena)}">${pp(r.zmena)}</span>` },
+    { k: 'ps_pir', label: 'PS 2025', n: 1, f: (r) => pct(r.ps_pir) },
+    { k: 'll_2026', label: 'Lepší L.', n: 1, f: (r) => pct(r.ll_2026) },
+    { k: 'slk_2026', label: 'SLK+', n: 1, f: (r) => pct(r.slk_2026) },
+  ], X.ctvrti, { sort: 'blok_2026' });
+
+  /* statutární města */
+  const M = X.mesta, lib = M.mesta.find((m) => m.mesto === 'Liberec');
+  $('#mesta-text').innerHTML = `<p>Piráti kandidovali v obou volbách ve ${M.srovnatelnych} z 26 statutárních měst. V polovině z nich si pirátský blok (Piráti + partneři) polepšil alespoň o ${nf((M.median_pomer - 1) * 100, 0)} % svého podílu.
+    Liberec s poměrem ${nf(lib.pomer, 2)} (ztráta třetiny podílu) je ${M.poradi_liberec}. z ${M.srovnatelnych}.</p>
+    <p>Rozhoduje ale, s kým Piráti kandidovali. Kde vstoupili do širších místních uskupení bez „Pirátů“ v názvu (Kladno, Ústí nad Labem, Karlovy Vary…), počítá se do bloku celé uskupení a podíl roste – medián ${nf(M.koalice.median_pomer, 2)}, rostlo ${M.koalice.rostlo} z ${M.koalice.mest}.
+    Mezi ${M.znacka.mest} městy, kde měla kandidátka „Piráti“ v názvu, je medián ${nf(M.znacka.median_pomer, 2)} a Liberec je ${M.znacka.poradi_liberec}. Kde Piráti kandidovali samostatně (Plzeň, Frýdek-Místek, Ostrava, Jablonec, Prostějov), blok všude klesl.</p>`;
+  const mt = table($('#tb-mesta'), [
+    { k: 'mesto', label: 'Město' },
+    { k: 'blok_2022', label: '2022', n: 1, f: (r) => (r.blok_2022 != null ? `${pct(r.blok_2022)} · ${r.mand_2022}` : '–'), title: 'podíl · mandáty' },
+    { k: 'blok_2026', label: '2026', n: 1, f: (r) => (r.blok_2026 != null ? `${pct(r.blok_2026)} · ${r.mand_2026}` : '–'), title: 'podíl · mandáty' },
+    { k: 'pomer', label: 'Poměr', n: 1, f: (r) => (r.pomer != null ? nf(r.pomer, 2) : '–'), title: '2026 ÷ 2022' },
+    { k: 'ps2025', label: 'PS 2025', n: 1, f: (r) => pct(r.ps2025) },
+    { k: 'pirlist_2026', label: 'Kandidátka s Piráty 2026', f: (r) => esc((r.pirlist_2026 || []).join(', ') || 'nekandidovali'), cls: 'wrap' },
+    { k: 'pirlist_2022', label: '2022', f: (r) => esc((r.pirlist_2022 || []).join(', ') || 'nekandidovali'), cls: 'wrap' },
+  ], M.mesta, { sort: 'pomer', rowClass: (r) => (r.mesto === 'Liberec' ? 'hl' : !r.srovnatelne ? 'muted' : '') });
+  $('#mesta-znacka').addEventListener('change', (e) => mt.set(e.target.checked ? M.mesta.filter((m) => m.znacka_2026 && m.srovnatelne) : M.mesta));
+
+  /* školy */
+  const S = X.skoly, P = S.portal;
+  $('#skoly-text').innerHTML = `<p>Liberec zveřejňuje průběh zápisů v portálech <a href="https://zapisyms.liberec.cz/materske-skoly">zapisyms.liberec.cz</a> a <a href="https://zapisyzs.liberec.cz/zakladni-skoly">zapisyzs.liberec.cz</a>.
+    Do mateřských škol se pro rok 2026/27 hlásilo ${int(P.ms.zadosti)} dětí na ${int(P.ms.mista)} míst (přijato ${int(P.ms.prijato)}), do prvních tříd ${int(P.zs.zadosti)} dětí na ${int(P.zs.mista)} míst (přijato ${int(P.zs.prijato)}).
+    Součty žádostí za jednotlivé školy jsou vyšší, protože rodiče se hlásí na víc škol najednou.</p>
+    <p>Spádové obvody ZŠ jsou ve vyhlášce jako seznam ulic. ${int(S.kontrola.jednoznacnych)} adres šlo přiřadit jednoznačně, ${int(S.kontrola.dopocitanych)} (úseky ulic „od – po“) podle nejbližších sousedních adres. Vratislavická ZŠ v portálu není.
+    Se změnou výsledku ani se silou kandidátky žádný ukazatel zápisů nesouvisí.</p>`;
+  table($('#tb-zs'), [
+    { k: 'kratky', label: 'Škola', cls: 'wrap', f: (r) => esc(r.adresa_kratka && /\d/.test(r.adresa_kratka) ? r.adresa_kratka : r.kratky.replace(/, Liberec.*$/, '')) },
+    { k: 'mista', label: 'Místa', n: 1 }, { k: 'spadove', label: 'Spádové děti', n: 1 },
+    { k: 'zadosti', label: 'Žádosti', n: 1 }, { k: 'prijato', label: 'Přijato', n: 1 }, { k: 'neprijato', label: 'Nepřijato', n: 1 },
+    { k: 'uspesnost', label: 'Úspěšnost', n: 1, f: (r) => pct(r.uspesnost, 0) },
+    { k: 'mista_na_spadove', label: 'Místa / spád.', n: 1, f: (r) => nf(r.mista_na_spadove, 2) },
+  ], S.zs, { sort: 'uspesnost', desc: false });
+  table($('#tb-ms'), [
+    { k: 'ctvrt', label: 'Část' }, { k: 'skol', label: 'Škol', n: 1 }, { k: 'mista', label: 'Místa', n: 1 }, { k: 'zadosti', label: 'Žádosti', n: 1 },
+    { k: 'prijato', label: 'Přijato', n: 1 }, { k: 'neprijato', label: 'Nepřijato', n: 1 },
+    { k: 'uspesnost', label: 'Úspěšnost', n: 1, f: (r) => pct(r.uspesnost, 0) },
+    { k: 'zadosti_na_misto', label: 'Žádostí / místo', n: 1, f: (r) => nf(r.zadosti_na_misto, 2) },
+  ], S.ms_ctvrti, { sort: 'uspesnost', desc: false });
+  const skL = [...new Set(S.korelace.map((k) => k.skola_label))], vyL = [...new Set(S.korelace.map((k) => k.vysledek_label))];
+  $('#tb-skoly-kor').innerHTML = `<thead><tr><th></th>${vyL.map((v) => `<th class="n">${esc(v)}</th>`).join('')}</tr></thead><tbody>` +
+    skL.map((s) => `<tr><td>${esc(s)}</td>${vyL.map((v) => { const k = S.korelace.find((q) => q.skola_label === s && q.vysledek_label === v); return `<td class="n">${sig(k)}</td>`; }).join('')}</tr>`).join('') + '</tbody>';
+
+  /* senioři */
+  const SN = X.seniori;
+  $('#seniori-note').textContent = `V Liberci je ${SN.domovy.length} pobytových zařízení pro seniory s ${int(SN.domovy.reduce((a, d) => a + d.kapacita, 0))} lůžky. Největší je Dům seniorů Františkov (okrsek 36) a dva domovy ve Vratislavicích (okrsek 1001).`;
+  table($('#tb-seniori'), [
+    { k: 'nazev', label: 'Zařízení', cls: 'wrap', f: (r) => `${esc(r.nazev)}<br><span class="muted">${esc(r.adresa)}</span>` },
+    { k: 'okrsek', label: 'Okrsek', n: 1, f: (r) => `${r.okrsek}<br><span class="muted">${esc(r.ctvrt)}</span>` },
+    { k: 'kapacita', label: 'Lůžek', n: 1, f: (r) => int(r.kapacita) },
+    { k: 'podil_kapacity', label: '% voličů', n: 1, f: (r) => pct(r.podil_kapacity), title: 'lůžka jako podíl voličů okrsku' },
+    ...['blok_2026', 'ano_2026', 'ucast_2026'].map((k) => ({ k, label: { blok_2026: 'LOL a Piráti', ano_2026: 'ANO', ucast_2026: 'Účast' }[k] + ' okrsek / okolí', n: 1,
+      sv: (r) => r.okrsek_hodnoty[k] - r.sousede_hodnoty[k], f: (r) => `${pct(r.okrsek_hodnoty[k])} / ${pct(r.sousede_hodnoty[k])}` })),
+  ], SN.domovy, { sort: 'kapacita' });
+
+  /* demografie */
+  const DM = X.demografie;
+  $('#demo-note').innerHTML = `Rozpočet z ${DM.bunek} buněk 1 km. Součet za okrsky (${int(DM.odhad.obyv)} obyvatel, 65+ ${pct(DM.odhad.v65)}, děti ${pct(DM.odhad.v0_14)}) je o několik procent vyšší než skutečný počet obyvatel, protože okrajové buňky zasahují do sousedních obcí; podíly to neovlivňuje.
+    Kandidátka LOL a Pirátů je silnější v okrscích s víc neobydlenými byty (r = ${rf(DM.korelace.find((k) => k.demo === 'cen_byty_neobydl' && k.vysledek === 'blok_2026').r)}) a stejně tak Piráti ve sněmovních volbách (r = ${rf(DM.korelace.find((k) => k.demo === 'cen_byty_neobydl' && k.vysledek === 'ps_pir').r)}). S věkovou skladbou ani s růstem okrsku výsledek nesouvisí.`;
+  const dL = [...new Set(DM.korelace.map((k) => k.demo_label))], vL = [...new Set(DM.korelace.map((k) => k.vysledek_label))];
+  $('#tb-demo').innerHTML = `<thead><tr><th></th>${vL.map((v) => `<th class="n">${esc(v)}</th>`).join('')}</tr></thead><tbody>` +
+    dL.map((d) => `<tr><td>${esc(d)}</td>${vL.map((v) => { const k = DM.korelace.find((q) => q.demo_label === d && q.vysledek_label === v); return `<td class="n">${sig(k)}</td>`; }).join('')}</tr>`).join('') + '</tbody>';
+  const VY = X.vystavba;
+  table($('#tb-vystavba'), [
+    { k: 'okrsek', label: 'Okrsek', n: 1 }, { k: 'ctvrt', label: 'Část' },
+    { k: 'volici_2022', label: 'Voliči 2022', n: 1, f: (r) => int(r.volici_2022) }, { k: 'volici_2026', label: '2026', n: 1, f: (r) => int(r.volici_2026) },
+    { k: 'rust', label: 'Přírůstek', n: 1, f: (r) => pr(r.rust) },
+    { k: 'blok_2026', label: 'LOL a Piráti', n: 1, f: (r) => pct(r.blok_2026) }, { k: 'zmena', label: 'Změna', n: 1, f: (r) => pp(r.zmena) },
+  ], VY.top);
+  $('#vystavba-note').textContent = `Liberec jako celek má o ${nf(Math.abs(VY.mesto_rust), 1)} % voličů ${VY.mesto_rust < 0 ? 'méně' : 'více'} než v roce 2022; o víc než 10 % vyrostly jen ${VY.rostoucich_10} okrsky. S přírůstkem voličů výsledek kandidátky nesouvisí (r = ${rf(VY.r_blok)}, změna r = ${rf(VY.r_zmena)}).`;
+
+  /* kontrola dat */
+  const KD = X.kontrola;
+  $('#kontrola-text').innerHTML = `<p>Přepočet mandátů sedí na oficiální výsledek 2022 i 2026. Poslední číslice počtu hlasů kandidátek v okrscích (${int(KD.cislice.n)} čísel ≥ 100) jsou rozložené rovnoměrně (χ² = ${nf(KD.cislice.chi2, 1)}, p = ${nf(KD.cislice.p, 2)}) – nic nenasvědčuje „vymýšleným“ číslům.</p>
+    <p>Výrazně odlišné jsou dvě skupiny okrsků. Okrsek 1 má účast ${pct(KD.nalezy.find((n) => n.okrsek === 1).hodnota)}, protože na adrese magistrátu jsou hlášené osoby bez skutečného bydliště. <b>V šesti ze sedmi vratislavických okrsků</b> je 4,5–12 % neplatných lístků do zastupitelstva města (medián města ${pct(KD.median.neplatne)}). Ve Vratislavicích se zároveň volí zastupitelstvo městského obvodu, voliči tedy dostávají dva lístky. Podobně nízké využití hlasů tam bylo už v roce 2022 (80–88 % možných hlasů na obálku proti 93 % ve zbytku města), jde tedy o dlouhodobý jev, ne o chybu sčítání. Na mandáty to vliv nemá.</p>`;
+  table($('#tb-kontrola'), [
+    { k: 'test', label: 'Ukazatel' }, { k: 'okrsek', label: 'Okrsek', n: 1, f: (r) => `${r.okrsek} <span class="muted">${esc(byO[r.okrsek]?.ctvrt || '')}</span>` },
+    { k: 'hodnota', label: 'Hodnota', n: 1, f: (r) => (r.jednotka === '%' ? pct(r.hodnota, 2) : `${nf(r.hodnota, 0)} ${esc(r.jednotka)}`) },
+    { k: 'median', label: 'Medián', n: 1, f: (r) => (r.jednotka === '%' ? pct(r.median, 2) : nf(r.median, 0)) },
+    { k: 'vysvetleni', label: 'Poznámka', cls: 'wrap', f: (r) => esc(r.vysvetleni) },
+  ], KD.nalezy);
+
+  /* kuriozity */
+  const KU = X.kuriozity;
+  table($('#tb-kur-povolani'), [
+    { k: 'listina', label: 'Kandidátka', cls: 'wrap' }, { k: 'it', label: 'IT', n: 1, f: (r) => pct(r.it, 0) }, { k: 'ucitele', label: 'Učitelé', n: 1, f: (r) => pct(r.ucitele, 0) },
+    { k: 'podnikatele', label: 'Podnikatelé', n: 1, f: (r) => pct(r.podnikatele, 0) }, { k: 'duchodci', label: 'Důchodci', n: 1, f: (r) => pct(r.duchodci, 0) },
+    { k: 'vek', label: 'Medián věku', n: 1, f: (r) => nf(r.vek, 0) },
+  ], KU.povolani.filter((p) => p.kandidatu >= 10), { rowClass: (r) => (/Piráti/.test(r.listina) ? 'hl' : '') });
+  const PA = KU.parita;
+  bars($('#ch-kur-parita'), [{ label: `Sudé okrsky (${PA.sudych})`, v: PA.sude, hi: true }, { label: `Liché okrsky (${PA.lichych})`, v: PA.liche, color: css('--gray-mark') }], { max: 15, d: 2 });
+  $('#kur-parita-note').textContent = `Rozdíl ${pp(PA.rozdil, 2)}, permutační p = ${nf(PA.p, 2)}. Parita čísla okrsku na výsledek nemá vliv – na rozdíl od Prahy 5, kde sudé okrsky „vyhrály“ o půl bodu (také náhodou).`;
+  bars($('#ch-kur-mistnost'), KU.mistnost.map((m) => ({ label: `${m.typ} (${m.okrsku})`, v: m.blok, hi: m.typ === 'základní škola', color: m.typ === 'základní škola' ? undefined : css('--gray-mark'), note: `změna proti 2022 ${pp(m.zmena)}` })), { max: 15 });
+  $('#kur-mistnost-note').textContent = `Typ budovy podle adresy místnosti v seznamu volebních místností (shoda s adresou školy). Rozdíl ve výsledku je zanedbatelný; ve školách se ale ztrácelo o ${nf(Math.abs(KU.mistnost.find((m) => m.typ === 'základní škola').zmena - KU.mistnost.find((m) => m.typ !== 'základní škola').zmena), 1)} bodu víc.`;
+  const C = KU.cas;
+  scatter($('#ch-kur-cas'), C.body.map((b) => ({ x: b.hodin, y: b.blok, label: oname(byO[b.okrsek]), tip: `<b>${esc(oname(byO[b.okrsek]))}</b><br>sečteno ${byO[b.okrsek].cas_secteni.slice(11, 16)}<br>LOL a Piráti ${pct(b.blok)}<br>${int(b.obalky)} obálek` })),
+    { xl: 'hodin po uzavření místností', yl: 'LOL a Piráti 2026 (%)', fit: true });
+  $('#kur-cas-note').textContent = `První byl sečtený okrsek ${C.prvni.okrsek} (${C.prvni.cas.slice(11, 16)}), poslední okrsek ${C.posledni.okrsek} (${C.posledni.cas.slice(11, 16)}). Výsledek kandidátky s časem nesouvisí (r = ${rf(C.r_blok)}); déle se počítalo tam, kde bylo víc obálek (r = ${rf(C.r_obalky)}) – v komunálních volbách se sčítá každý křížek.`;
+  const T = KU.titul;
+  bars($('#ch-kur-titul'), [{ label: `S titulem (${T.s_titulem_n})`, v: T.s_titulem * 100, hi: true }, { label: `Bez titulu (${T.kandidatu - T.s_titulem_n})`, v: T.bez_titulu * 100, color: css('--gray-mark') }], { max: 110, unit: '', d: 1 });
+  $('#kur-titul-note').textContent = `Kandidát s titulem dostane v průměru o ${nf(T.rozdil_pct, 1)} % víc preferenčních hlasů než průměr své kandidátky (90% interval ${nf(T.p05, 1)}–${nf(T.p95, 1)} %); po zohlednění pořadí na kandidátce o ${nf(T.rozdil_po_poradi, 1)} %. ${T.kandidatu} kandidátů všech kandidátek do zastupitelstva Liberce.`;
 }

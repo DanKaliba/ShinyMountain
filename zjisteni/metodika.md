@@ -9,4 +9,11 @@
 - **Přesuny voličů:** Goodmanova ekologická regrese s omezeními (podíly na zapsaných voličích, řádky matice nezáporné se součtem 1), váhy = počet voličů, 90% intervaly z bootstrapu okrsků (200×). Vyřazené jsou okrsky se změnou počtu voličů mimo 80–125 %, s méně než 150 voliči nebo s velmi nízkou účastí (zbývá 85 z 87). Jde o odhad z rozdílů mezi okrsky (ekologický klam) – nikoli o zjištění, kdo jak volil.
 - **Individuální hlasy:** u každého okrsku se od hlasů kandidáta odečte nejnižší počet hlasů kandidáta na kandidátce (přibližně křížek pro celou kandidátku); zbytek jsou hlasy pro jednotlivce, sečtené přes okrsky.
 - **Přednostní hlasy:** kandidát s alespoň o 10 % víc hlasy, než je průměr na kandidáta kandidátky, postupuje dopředu.
-- Analýza vznikla s pomocí AI (Claude). Skripty: `scripts/liberec.py`.
+- **Části města:** adresní místa RÚIAN (ČÚZK, stav 30. 9. 2026, 16 341 adres) převedená z S-JTSK do WGS84 a přiřazená do okrsků podle hranic; okrsek patří k části obce, kde leží většina jeho adres.
+- **Školy:** průběh zápisů 2026/27 z portálů zapisyms.liberec.cz a zapisyzs.liberec.cz (stav 20. 10. 2026). Úspěšnost = přijatí ÷ (přijatí + nepřijatí). Spádové obvody ZŠ podle OZV č. 1/2025 (seznamy ulic a čísel popisných); adresy na úsecích ulic „od – po“ podle 7 nejbližších jednoznačně přiřazených adres.
+- **Senioři:** registr poskytovatelů sociálních služeb MPSV – domovy pro seniory, domovy se zvláštním režimem a odlehčovací pobytové služby pro seniory; poloha podle kódu adresního místa. Srovnání s 6 nejbližšími okrsky.
+- **Demografie:** Statistický atlas ČSÚ (SLDB 2021, 1km mřížka: věk, byty, změna 2011–2021, vyjížďka) rozpočítaný do okrsků podle počtu adres v buňce. Použité jsou jen liberecké adresy, proto jsou absolutní počty v okrajových okrscích nadsazené; podíly to neovlivňuje.
+- **Statutární města:** pirátský blok = kandidátky složené jen z Pirátů, jejich partnerů z let 2022 a 2026 v daném městě a nezávislých; srovnání jen tam, kde Piráti kandidovali v obou volbách.
+- **Kontrola dat:** robustní z-skóre (medián, MAD) > 3,5 pro účast, neplatné lístky a využití hlasů; obálky vydané a neodevzdané; nula hlasů pro kandidátku nad 5 %; rovnoměrnost poslední číslice (χ², simulované p).
+- **Kuriozity:** čas sečtení okrsku z dávek ČSÚ (atribut `DATUM_CAS_ZPRAC`), volební místnosti ze seznamu telefonů do volebních místností (liberec.cz), typ budovy podle shody adresy se školou.
+- Analýza vznikla s pomocí AI (Claude). Skripty: `scripts/liberec.py`, `scripts/doplnky.py`, `scripts/adresy.py`.

@@ -6,7 +6,7 @@
 <title>Piráti Liberec – volby 2026</title>
 <meta name="description" content="Analýza výsledků společné kandidátky Liberec otevřený lidem a Piráti v komunálních volbách 2026 v Liberci po volebních okrscích: srovnání s rokem 2022 a sněmovními volbami 2025, mandáty, přesuny voličů a preferenční hlasy.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="style.css?v=20261020a">
+<link rel="stylesheet" href="style.css?v=20261020b">
 </head>
 <body>
 <header class="top" id="top">
@@ -15,7 +15,7 @@
     <h1>Jak dopadli Piráti v Liberci</h1>
     <p class="lede">Společná kandidátka „Liberec otevřený lidem a&nbsp;Piráti“ po všech 87 volebních okrscích: srovnání se samostatnými kandidátkami z&nbsp;roku 2022 a&nbsp;se sněmovními volbami 2025, mandáty, odhad přesunů voličů a&nbsp;preferenční hlasy.</p>
     <nav class="toc" aria-label="Obsah">
-      <a href="#zjisteni">Zjištění</a><a href="#strany">Strany</a><a href="#mandaty">Mandáty</a><a href="#okrsky">Okrsky</a><a href="#zmena">Kde se ztrácelo</a><a href="#presuny">Přesuny voličů</a><a href="#kandidati">Kandidáti</a><a href="#metodika">Metodika</a>
+      <a href="#zjisteni">Zjištění</a><a href="#strany">Strany</a><a href="#mandaty">Mandáty</a><a href="#okrsky">Okrsky</a><a href="#ctvrti">Části města</a><a href="#zmena">Kde se ztrácelo</a><a href="#presuny">Přesuny voličů</a><a href="#kandidati">Kandidáti</a><a href="#mesta">Statutární města</a><a href="#skoly">Školy</a><a href="#seniori">Senioři</a><a href="#demografie">Demografie</a><a href="#kontrola">Kontrola dat</a><a href="#kuriozity">Kuriozity</a><a href="#metodika">Metodika</a>
     </nav>
   </div>
 </header>
@@ -75,6 +75,22 @@
     </figure>
   </section>
 
+  <section id="ctvrti">
+    <h2>Části města</h2>
+    <p class="note">Každý okrsek je přiřazený k části obce, ve které leží většina jeho adres (adresní místa RÚIAN). Části s jediným okrskem jsou malé – jejich čísla ber s rezervou.</p>
+    <div class="grid2">
+      <figure class="card">
+        <figcaption>LOL a Piráti 2026 a změna proti 2022 podle částí města</figcaption>
+        <div id="ch-ctvrti"></div>
+      </figure>
+      <figure class="card">
+        <figcaption>Části města – souhrn</figcaption>
+        <div class="tablewrap tall"><table class="data sortable" id="tb-ctvrti"></table></div>
+        <p class="small">Podíly jsou vážené počtem odevzdaných obálek v okrscích.</p>
+      </figure>
+    </div>
+  </section>
+
   <section id="zmena">
     <h2>Kde se ztrácelo</h2>
     <div class="prose" id="zmena-text"></div>
@@ -117,6 +133,83 @@
     </figure>
   </section>
 
+  <section id="mesta">
+    <h2>Statutární města: pirátský blok 2022 → 2026</h2>
+    <div class="prose" id="mesta-text"></div>
+    <figure class="card">
+      <figcaption>26 statutárních měst – podíl kandidátek s Piráty a jejich partnery</figcaption>
+      <div class="controls"><label><input type="checkbox" id="mesta-znacka"> jen města, kde kandidátka s Piráty měla v roce 2026 „Piráti“ v názvu</label></div>
+      <div class="tablewrap tall"><table class="data sortable" id="tb-mesta"></table></div>
+      <p class="small">Blok = kandidátky, jejichž složení tvoří jen Piráti, jejich partneři z let 2022 a 2026 v daném městě a nezávislí (stejné pravidlo jako u srovnání pražských MČ na ShinySpace). Podíl z hlasů kandidátek (bez přepočtu neúplných kandidátek). PS 2025 = Piráti ve sněmovních volbách na území města.</p>
+    </figure>
+  </section>
+
+  <section id="skoly">
+    <h2>Školy: zápisy 2026/27</h2>
+    <div class="prose" id="skoly-text"></div>
+    <div class="grid2">
+      <figure class="card">
+        <figcaption>Základní školy – spádovost a přijetí</figcaption>
+        <div class="tablewrap tall"><table class="data sortable" id="tb-zs"></table></div>
+      </figure>
+      <figure class="card">
+        <figcaption>Mateřské školy podle částí města</figcaption>
+        <div class="tablewrap tall"><table class="data sortable" id="tb-ms"></table></div>
+      </figure>
+    </div>
+    <figure class="card">
+      <figcaption>Souvisí zápisy se spádovou ZŠ s výsledkem voleb? (87 okrsků)</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-skoly-kor"></table></div>
+      <p class="small">Okrsek dostane vážený průměr ukazatelů spádových škol podle toho, kolik jeho adres patří do kterého školského obvodu (OZV č. 1/2025). Ukazatele ZŠ se dají zobrazit i v mapě okrsků.</p>
+    </figure>
+  </section>
+
+  <section id="seniori">
+    <h2>Domovy pro seniory</h2>
+    <p class="note" id="seniori-note"></p>
+    <figure class="card">
+      <figcaption>Pobytová zařízení pro seniory a okolí (6 nejbližších okrsků)</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-seniori"></table></div>
+      <p class="small">Zdroj: registr poskytovatelů sociálních služeb MPSV (domovy pro seniory, domovy se zvláštním režimem, odlehčovací pobytové služby pro seniory). Kapacita = lůžka; u služby s více budovami rozdělená rovným dílem. Voliči z domova jsou jen malá část voličů okrsku – rozdíl proti okolí nemusí s domovem souviset.</p>
+    </figure>
+  </section>
+
+  <section id="demografie">
+    <h2>Demografie (sčítání 2021) a nová výstavba</h2>
+    <p class="note" id="demo-note"></p>
+    <figure class="card">
+      <figcaption>Korelace demografie okrsku s výsledky 2026 (r; tučně = významné i po korekci FDR)</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-demo"></table></div>
+      <p class="small">1km mřížka SLDB 2021 rozpočítaná do okrsků podle adresních míst. Sousední okrsky sdílejí buňky, korelace jsou proto spíš nadhodnocené. Bez „úředního“ okrsku 1. Vrstvy jsou i v mapě okrsků.</p>
+    </figure>
+    <figure class="card">
+      <figcaption>Nová výstavba: okrsky s největším přírůstkem voličů 2022 → 2026</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-vystavba"></table></div>
+      <p class="small" id="vystavba-note"></p>
+    </figure>
+  </section>
+
+  <section id="kontrola">
+    <h2>Kontrola dat okrsků</h2>
+    <div class="prose" id="kontrola-text"></div>
+    <figure class="card">
+      <figcaption>Okrsky, které se v některém ukazateli výrazně liší od ostatních (robustní z-skóre > 3,5)</figcaption>
+      <div class="tablewrap"><table class="data" id="tb-kontrola"></table></div>
+    </figure>
+  </section>
+
+  <section id="kuriozity">
+    <h2>Kuriozity</h2>
+    <p class="note">Datově správně, prakticky k ničemu. Ukázka, že ne každá souvislost něco znamená.</p>
+    <div class="grid2">
+      <figure class="card"><figcaption>1. Kdo kandiduje: povolání kandidátů podle kandidátek</figcaption><div class="tablewrap"><table class="data" id="tb-kur-povolani"></table></div></figure>
+      <figure class="card"><figcaption>2. Volte v sudém okrsku? LOL a Piráti v sudých a lichých okrscích</figcaption><div id="ch-kur-parita"></div><p class="small" id="kur-parita-note"></p></figure>
+      <figure class="card"><figcaption>3. Volební místnost ve škole, nebo jinde?</figcaption><div id="ch-kur-mistnost"></div><p class="small" id="kur-mistnost-note"></p></figure>
+      <figure class="card"><figcaption>4. Čas sečtení okrsku × výsledek LOL a Pirátů</figcaption><div id="ch-kur-cas"></div><p class="small" id="kur-cas-note"></p></figure>
+      <figure class="card"><figcaption>5. Titul před jménem a preferenční hlasy (100 = průměr vlastní kandidátky)</figcaption><div id="ch-kur-titul"></div><p class="small" id="kur-titul-note"></p></figure>
+    </div>
+  </section>
+
   <section id="metodika" class="prose">
     <h2>Metodika a zdroje</h2>
     <div data-md="metodika.md"></div>
@@ -130,7 +223,7 @@
 <div id="tip" class="tip" role="tooltip" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="charts.js?v=20261020a"></script>
-<script src="app.js?v=20261020a"></script>
+<script src="charts.js?v=20261020b"></script>
+<script src="app.js?v=20261020b"></script>
 </body>
 </html>
