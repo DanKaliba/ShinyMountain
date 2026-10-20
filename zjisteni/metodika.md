@@ -16,4 +16,6 @@
 - **Statutární města:** pirátský blok = kandidátky složené jen z Pirátů, jejich partnerů z let 2022 a 2026 v daném městě a nezávislých; srovnání jen tam, kde Piráti kandidovali v obou volbách.
 - **Kontrola dat:** robustní z-skóre (medián, MAD) > 3,5 pro účast, neplatné lístky a využití hlasů; obálky vydané a neodevzdané; nula hlasů pro kandidátku nad 5 %; rovnoměrnost poslední číslice (χ², simulované p).
 - **Kuriozity:** čas sečtení okrsku z dávek ČSÚ (atribut `DATUM_CAS_ZPRAC`), volební místnosti ze seznamu telefonů do volebních místností (liberec.cz), typ budovy podle shody adresy se školou.
+- **Časová řada:** otevřená data ČSÚ – KV 2018, PS 2021, prezident 2023, EP 2024, KZ 2024 (Liberecký kraj). Okrsky mají ve všech volbách stejná čísla. V PS 2021 kandidovali Piráti v koalici se STAN, jejich samostatný podíl z okrsků oddělit nejde. Přebytek voličů v seznamu proti komunálním volbám = voliči na voličský průkaz (čistý, protože občané EU volí jen v komunálních); v interním odhadu rezervy se o něj pirátské hlasy PS 2025 zmenšují.
+- **Kontext radnice:** veřejné zprávy (ČT24, ČTK, Novinky, e15) a koaliční smlouva 2024–2026 na liberec.cz; odkazy jsou u jednotlivých událostí.
 - Analýza vznikla s pomocí AI (Claude). Skripty: `scripts/liberec.py`, `scripts/doplnky.py`, `scripts/adresy.py`.

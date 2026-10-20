@@ -43,6 +43,7 @@ a složka `dl_liberec/`:
 ```bash
 python scripts/liberec.py dl data                 # ~3 min (bootstrap ekologické inference)
 python scripts/doplnky.py dl dl_liberec data      # části města, školy, senioři, demografie, kontrola dat, kuriozity, statutární města (~3 min)
+python scripts/casova_rada.py dl data             # časová řada KV 2018 – KV 2026 (v dl navíc KV2018_*, PS2021_*, PREZ2023_*_NSS, EP2024*, KZ2024*)
 ```
 
 Zdroje: ČSÚ – [volby.gov.cz](https://volby.gov.cz/opendata/opendata.htm), ČÚZK – RÚIAN, MPSV – registr poskytovatelů sociálních služeb,

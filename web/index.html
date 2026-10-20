@@ -6,7 +6,7 @@
 <title>Piráti Liberec – volby 2026</title>
 <meta name="description" content="Analýza výsledků společné kandidátky Liberec otevřený lidem a Piráti v komunálních volbách 2026 v Liberci po volebních okrscích: srovnání s rokem 2022 a sněmovními volbami 2025, mandáty, přesuny voličů a preferenční hlasy.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="style.css?v=20261020b">
+<link rel="stylesheet" href="style.css?v=20261020c">
 </head>
 <body>
 <header class="top" id="top">
@@ -15,7 +15,7 @@
     <h1>Jak dopadli Piráti v Liberci</h1>
     <p class="lede">Společná kandidátka „Liberec otevřený lidem a&nbsp;Piráti“ po všech 87 volebních okrscích: srovnání se samostatnými kandidátkami z&nbsp;roku 2022 a&nbsp;se sněmovními volbami 2025, mandáty, odhad přesunů voličů a&nbsp;preferenční hlasy.</p>
     <nav class="toc" aria-label="Obsah">
-      <a href="#zjisteni">Zjištění</a><a href="#strany">Strany</a><a href="#mandaty">Mandáty</a><a href="#okrsky">Okrsky</a><a href="#ctvrti">Části města</a><a href="#zmena">Kde se ztrácelo</a><a href="#presuny">Přesuny voličů</a><a href="#kandidati">Kandidáti</a><a href="#mesta">Statutární města</a><a href="#skoly">Školy</a><a href="#seniori">Senioři</a><a href="#demografie">Demografie</a><a href="#kontrola">Kontrola dat</a><a href="#kuriozity">Kuriozity</a><a href="#metodika">Metodika</a>
+      <a href="#zjisteni">Zjištění</a><a href="#kontext">Kontext radnice</a><a href="#strany">Strany</a><a href="#rada">Časová řada</a><a href="#mandaty">Mandáty</a><a href="#okrsky">Okrsky</a><a href="#ctvrti">Části města</a><a href="#zmena">Kde se ztrácelo</a><a href="#presuny">Přesuny voličů</a><a href="#kandidati">Kandidáti</a><a href="#mesta">Statutární města</a><a href="#skoly">Školy</a><a href="#seniori">Senioři</a><a href="#demografie">Demografie</a><a href="#kontrola">Kontrola dat</a><a href="#kuriozity">Kuriozity</a><a href="#metodika">Metodika</a>
     </nav>
   </div>
 </header>
@@ -26,6 +26,10 @@
   <section id="zjisteni">
     <h2>Hlavní zjištění</h2>
     <div class="findings" data-md="hlavni-zjisteni.md"></div>
+  </section>
+
+  <section id="kontext" class="prose">
+    <div data-md="kontext.md"></div>
   </section>
 
   <section id="strany">
@@ -45,6 +49,35 @@
     <div class="grid2">
       <figure class="card"><figcaption>Kandidátky 2026</figcaption><div class="tablewrap"><table class="data" id="tb-l26"></table></div></figure>
       <figure class="card"><figcaption>Kandidátky 2022</figcaption><div class="tablewrap"><table class="data" id="tb-l22"></table></div></figure>
+    </div>
+  </section>
+
+  <section id="rada">
+    <h2>Časová řada 2018–2026</h2>
+    <div class="prose" id="rada-text"></div>
+    <div class="grid2">
+      <figure class="card">
+        <figcaption>Piráti a jejich spojenci ve volbách v Liberci (podíl hlasů)</figcaption>
+        <div id="ch-rada"></div>
+        <p class="small">Každé volby měří něco trochu jiného – v popisku je, co přesně (koalice, samostatně, předchůdci). Prezidentské volby (Petr Pavel) jsou jen pro srovnání prostorového vzoru.</p>
+      </figure>
+      <figure class="card">
+        <figcaption>Jak podobné je rozložení po okrscích mezi volbami (korelace přes 86 okrsků)</figcaption>
+        <div class="tablewrap"><table class="data" id="tb-rada-kor"></table></div>
+        <p class="small">1 = stejné pořadí okrsků, 0 = žádná souvislost. Bez „úředního“ okrsku 1.</p>
+      </figure>
+    </div>
+    <div class="grid2">
+      <figure class="card">
+        <figcaption>Okrsky, kde si kandidátka 2026 vedla nejlépe a nejhůř proti očekávání</figcaption>
+        <div class="tablewrap"><table class="data" id="tb-rada-rez"></table></div>
+        <p class="small" id="rada-rez-note"></p>
+      </figure>
+      <figure class="card">
+        <figcaption>Voliči na voličský průkaz (studenti, pacienti…) – okrsky s největším přebytkem</figcaption>
+        <div class="tablewrap"><table class="data" id="tb-prukazy"></table></div>
+        <p class="small" id="prukazy-note"></p>
+      </figure>
     </div>
   </section>
 
@@ -223,7 +256,7 @@
 <div id="tip" class="tip" role="tooltip" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="charts.js?v=20261020b"></script>
-<script src="app.js?v=20261020b"></script>
+<script src="charts.js?v=20261020c"></script>
+<script src="app.js?v=20261020c"></script>
 </body>
 </html>

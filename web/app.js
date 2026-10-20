@@ -12,12 +12,12 @@ document.querySelectorAll('main section[id]').forEach((sec) => {
 
 /* ---------- zjištění z Markdownu (složka zjisteni/) ---------- */
 document.querySelectorAll('[data-md]').forEach((elm) => {
-  fetch('../zjisteni/' + elm.dataset.md + '?v=20261020b').then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status)))).then((md) => {
+  fetch('../zjisteni/' + elm.dataset.md + '?v=20261020c').then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status)))).then((md) => {
     elm.innerHTML = window.marked ? marked.parse(md) : `<pre>${esc(md)}</pre>`;
   }).catch((e) => { elm.innerHTML = `<p class="muted">Soubor zjisteni/${esc(elm.dataset.md)} se nepodařilo načíst (${esc(e.message)}).</p>`; });
 });
 
-fetch('../data/liberec.json?v=20261020b').then((r) => r.json()).then(init).catch((e) => {
+fetch('../data/liberec.json?v=20261020c').then((r) => r.json()).then(init).catch((e) => {
   document.querySelector('main').insertAdjacentHTML('afterbegin', `<p class="card">Data se nepodařilo načíst (${esc(e.message)}). Stránku je potřeba otevřít přes web server, ne jako soubor.</p>`);
 });
 
@@ -97,6 +97,11 @@ function init(D) {
     { k: 'cen_byty_neobydl', label: 'Neobydlené byty (SLDB)', br: [5, 7, 9, 12, 14], ramp: BLUE },
     { k: 'cen_rust_11_21', label: 'Růst obyvatel 2011–21', br: [-5, 0, 5, 10, 20], ramp: BLUE },
     { k: 'rust_volicu', label: 'Přírůstek voličů 2022 → 2026', br: [-5, -2, 0, 2, 5], ramp: BLUE },
+    { k: 'r_kz2024', label: 'Piráti krajské 2024', br: [3, 4, 5, 6, 7], ramp: BLUE, get: (o) => o.rada?.kz2024 },
+    { k: 'r_ep2024', label: 'Piráti evropské 2024', br: [4, 5, 6.5, 8, 9.5], ramp: BLUE, get: (o) => o.rada?.ep2024 },
+    { k: 'r_ps2021', label: 'PIRÁTI a STAROSTOVÉ 2021', br: [18, 21, 24, 27, 30], ramp: BLUE, get: (o) => o.rada?.ps2021 },
+    { k: 'r_kv2018', label: 'LOL! + Změna pro Liberec 2018', br: [12, 15, 18, 21, 24], ramp: BLUE, get: (o) => o.rada?.kv2018 },
+    { k: 'rada_rezidual', label: '2026 proti očekávání', br: [-3, -1.5, 0, 1.5, 3], ramp: DIVr, fmt: (v) => nf(v, 1), pp: true },
     { k: 'hodin_secteni', label: 'Čas sečtení', br: [3.5, 4, 4.5, 5.5, 6.5], ramp: ORANGE, fmt: (v) => nf(v, 1) + ' h', num: true, unit: ' hodin po uzavření místností (sobota 14:00)' },
   ];
   let cur = LAYERS[0], sel = null, lyr;
@@ -109,9 +114,10 @@ function init(D) {
     btns.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', 'false'));
     b.setAttribute('aria-checked', 'true'); cur = LAYERS[+b.dataset.i]; restyle();
   }));
+  const val = (o, Lr) => (Lr.get ? Lr.get(o) : o[Lr.k]);
   const styleF = (f) => {
     const o = byO[f.properties.o];
-    return { fillColor: binColor(o[cur.k], cur.br, cur.ramp), fillOpacity: 0.82, color: sel === o.okrsek ? css('--ink') : css('--surface'), weight: sel === o.okrsek ? 3 : 1 };
+    return { fillColor: binColor(val(o, cur), cur.br, cur.ramp), fillOpacity: 0.82, color: sel === o.okrsek ? css('--ink') : css('--surface'), weight: sel === o.okrsek ? 3 : 1 };
   };
   function restyle() {
     lyr && lyr.setStyle(styleF);
@@ -125,7 +131,7 @@ function init(D) {
       style: styleF,
       onEachFeature: (f, l) => {
         const o = byO[f.properties.o];
-        l.bindTooltip(() => `<b>${oname(o)}</b><br>${cur.label}: ${fmtV(cur, o[cur.k])}`, { sticky: true });
+        l.bindTooltip(() => `<b>${oname(o)}</b><br>${cur.label}: ${fmtV(cur, val(o, cur))}`, { sticky: true });
         l.on('click', () => select(o.okrsek));
       },
     }).addTo(map);
@@ -235,6 +241,65 @@ function init(D) {
   ], D.kandidati_koalice, { rowClass: (r) => (r.nominace === 'Piráti' ? 'hl' : '') });
 
   if (D.doplnky) doplnky(D, byO, oname);
+  if (D.casova_rada) casovaRada(D, byO, oname);
+}
+
+/* Spojnicový graf v čase: body [{datum, v, label, tip, hi}] */
+function timeLine(container, pts, { max }) {
+  const W = 560, H = 300, L = 56, R = 24, T = 16, B = 56;
+  const s = svgRoot(container, W, H);
+  const ts = pts.map((p) => +new Date(p.datum)), t0 = Math.min(...ts), t1 = Math.max(...ts);
+  const X = (t) => L + (t - t0) / (t1 - t0) * (W - L - R), Y = (v) => H - B - v / max * (H - T - B);
+  for (let v = 0; v <= max; v += 10) {
+    el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), class: v ? 'grid' : 'axis' }, s);
+    el('text', { x: L - 6, y: Y(v) + 4, 'text-anchor': 'end' }, s).textContent = v + ' %';
+  }
+  for (let y = 2018; y <= 2026; y += 2) el('text', { x: X(+new Date(`${y}-07-01`)), y: H - B + 18, 'text-anchor': 'middle' }, s).textContent = y;
+  const P = pts.filter((p) => p.line);
+  el('path', { d: P.map((p, i) => `${i ? 'L' : 'M'}${X(+new Date(p.datum))},${Y(p.v)}`).join(' '), fill: 'none', stroke: css('--ink'), 'stroke-width': 2, opacity: 0.5 }, s);
+  pts.forEach((p) => {
+    const x = X(+new Date(p.datum)), y = Y(p.v);
+    const c = el('circle', { cx: x, cy: y, r: p.hi ? 7 : 5, fill: p.line ? css('--ink') : css('--surface'), stroke: p.line ? css('--surface') : css('--muted'), 'stroke-width': 2 }, s);
+    el('text', { x, y: y - 12, 'text-anchor': 'middle', class: 'lbl' }, s).textContent = nf(p.v, 1);
+    const hit = el('circle', { cx: x, cy: y, r: 14, fill: 'transparent' }, s);
+    hover(hit, p.tip);
+    void c;
+  });
+  tableToggle(container, ['Volby', 'Co se měří', 'Podíl', 'Účast'], pts.map((p) => [p.label, p.popis, pct(p.v, 2), pct(p.ucast)]));
+}
+
+/* ---------- časová řada 2018–2026 ---------- */
+function casovaRada(D, byO, oname) {
+  const C = D.casova_rada, R = C.rada, byK = Object.fromEntries(R.map((r) => [r.kod, r]));
+  const PR = C.predikce_2026;
+  $('#rada-text').innerHTML = `<p>V roce 2018 Piráti do zastupitelstva Liberce nekandidovali (kandidovali předchůdci LOL), v roce 2022 kandidovali samostatně. Mezi komunálními volbami pak prošli prudkým propadem:
+    v evropských volbách 2024 měli ${pct(byK.ep2024.pct)} a v krajských ${pct(byK.kz2024.pct)} – v době, kdy byli ve vedení města. Ve sněmovních volbách 2025 se zvedli na ${pct(byK.ps2025.pct)}.
+    Komunální výsledek 2026 (${pct(byK.kv2026.pct)}) je tak nad úrovní Pirátů z let 2024–2025, ale pod součtem obou kandidátek z roku 2022 (${pct(byK.kv2022.pct)}).</p>
+    <p>Rozložení po okrscích je v čase stabilní: kde byla kandidátka silná v roce 2022, je silná i v roce 2026 (r = ${nf(C.index_zmeny.kv22_kv26.r, 2)}), a stejně podobné je rozložení Pirátů ve sněmovních volbách 2025 (r = ${nf(C.index_zmeny.ps25_kv26.r, 2)}).
+    Obě volby dohromady vysvětlují ${nf(PR.r2 * 100, 0)} % rozdílů mezi okrsky v roce 2026; krajské volby 2024 už nic nepřidávají.</p>`;
+  const pts = R.map((r) => ({ datum: r.datum, v: r.pct, label: r.volby, popis: r.popis, ucast: r.ucast, line: r.typ !== 'PREZ', hi: r.kod === 'kv2026',
+    tip: `<b>${esc(r.volby)}</b><br>${esc(r.popis)}: ${pct(r.pct, 2)}<br>účast ${pct(r.ucast)}` + Object.entries(r.dalsi).map(([k, v]) => `<br>${{ ano: 'ANO', slk: 'Starostové (SLK)', stan: 'STAN', spolu: 'SPOLU', nerudova: 'Nerudová', babis: 'Babiš', pirati: 'Piráti samotní' }[k] || k}: ${pct(v, 1)}`).join('') }));
+  timeLine($('#ch-rada'), pts, { max: 45 });
+  const lab = Object.fromEntries(R.map((r) => [r.kod, r.volby.replace('Prezident 2023, 1. kolo', 'Pavel 23').replace('Komunální', 'KV').replace('Sněmovní', 'PS').replace('Evropské', 'EP').replace('Krajské', 'KZ').replace(/ 20(\d\d)$/, ' $1')]));
+  const K = C.korelace, ord = R.map((r) => r.kod);
+  $('#tb-rada-kor').innerHTML = `<thead><tr><th></th>${ord.map((k) => `<th class="n">${esc(lab[k])}</th>`).join('')}</tr></thead><tbody>` +
+    ord.map((a) => `<tr><td>${esc(lab[a])}</td>${ord.map((b) => { const v = K.r[K.volby.indexOf(a)][K.volby.indexOf(b)]; return `<td class="n" style="background:${a === b ? 'transparent' : `color-mix(in srgb, ${css('--s1')} ${Math.round(Math.max(0, v) * 60)}%, transparent)`}">${a === b ? '' : nf(v, 2)}</td>`; }).join('')}</tr>`).join('') + '</tbody>';
+  const rows = [...C.nejlepe.map((r) => ({ ...r, smer: 'lépe' })), ...C.nejhure.map((r) => ({ ...r, smer: 'hůř' }))];
+  table($('#tb-rada-rez'), [
+    { k: 'okrsek', label: 'Okrsek', n: 1 }, { k: 'ctvrt', label: 'Část' },
+    { k: 'kv2026', label: '2026', n: 1, f: (r) => pct(r.kv2026) },
+    { k: 'rezidual', label: 'Proti očekávání', n: 1, f: (r) => `<span class="${sgnCls(r.rezidual)}">${pp(r.rezidual)}</span>` },
+  ], rows, { sort: 'rezidual' });
+  $('#rada-rez-note').textContent = `Očekávání = lineární model z výsledků KV 2022, PS 2025 a KZ 2024 v okrsku (R² = ${nf(PR.r2, 2)}). Lépe: ${[...new Set(C.nejlepe.map((r) => r.ctvrt))].join(', ')}; hůř: ${[...new Set(C.nejhure.map((r) => r.ctvrt))].join(', ')}. Vrstva „2026 proti očekávání“ je i v mapě.`;
+  const PZ = C.prukazy;
+  table($('#tb-prukazy'), [
+    { k: 'okrsek', label: 'Okrsek', n: 1 }, { k: 'ctvrt', label: 'Část' },
+    { k: 'kv2026', label: 'Voliči KV 2026', n: 1, f: (r) => int(r.kv2026) },
+    { k: 'ps2021', label: 'PS 2021', n: 1, f: (r) => pr(r.ps2021 / r.kv2026 * 100, 0), sv: (r) => r.ps2021 },
+    { k: 'prez2023_1', label: 'Prezident 2023', n: 1, f: (r) => pr(r.prez2023_1 / r.kv2026 * 100, 0), sv: (r) => r.prez2023_1 },
+    { k: 'ps2025', label: 'PS 2025', n: 1, f: (r) => pr(r.ps2025 / r.kv2026 * 100, 0), sv: (r) => r.ps2025 },
+  ], PZ.okrsky, { sort: 'ps2025' });
+  $('#prukazy-note').textContent = `V celostátních volbách se lze zapsat na voličský průkaz v libovolném okrsku (studenti TUL na kolejích, pacienti nemocnice), v komunálních ne. V celém Liberci to ve sněmovních volbách 2025 dělalo čistě jen asi ${int(PZ.celkem.ps2025)} voličů navíc proti komunálním (2021: ${int(PZ.celkem.ps2021)}) – na srovnání sněmovních a komunálních voleb to má jen malý vliv. Přebytek je čistý: cizinci z EU naopak mohou volit jen v komunálních.`;
 }
 
 /* ---------- doplňky: části města, statutární města, školy, senioři, demografie, kontrola dat, kuriozity ---------- */
